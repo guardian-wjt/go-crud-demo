@@ -6,6 +6,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
+	"strconv"
 	"time"
 )
 
@@ -196,6 +197,52 @@ func main() {
 				"msg":  "查询成功了",
 				"data": dataList,
 				"code": 200,
+			})
+		}
+
+	})
+
+	// 全部查询
+	r.GET("/user/list", func(c *gin.Context) {
+
+		var dataList []List
+
+		// 1.查询全部数据	或	查询分页数据
+		pageNum, _ := strconv.Atoi(c.Query("pageNum"))   // 当前页数
+		pageSize, _ := strconv.Atoi(c.Query("pageSize")) //当前页数显示的条数
+
+		// 判断是否需要分页
+		if pageNum == 0 || pageSize == 0 {
+			pageNum = -1
+			pageSize = -1
+		}
+
+		offsetVal := (pageNum - 1) * pageSize // 分页的固定写法
+		if pageNum == -1 && pageSize == -1 {
+			offsetVal = -1
+		}
+
+		//返回总数据
+		var total int64
+		//查询数据库
+		db.Model(dataList).Count(&total).Limit(pageSize).Offset(offsetVal).Find(&dataList)
+
+		if len(dataList) == 0 {
+			c.JSON(200, gin.H{
+				"msg":  "没有查询到对应数据",
+				"data": gin.H{},
+				"code": 400,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"msg":  "查询成功了",
+				"code": 200,
+				"data": gin.H{
+					"list":     dataList,
+					"pageNum":  pageNum,
+					"pageSize": pageSize,
+					"total":    total,
+				},
 			})
 		}
 
