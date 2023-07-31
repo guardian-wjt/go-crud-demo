@@ -171,7 +171,35 @@ func main() {
 
 	})
 
-	//查
+	//查 (条件查询，全部查询 / 分页查询)
+
+	// 条件查询
+	r.GET("/user/list/:name", func(c *gin.Context) {
+
+		// 获取路径参数
+		name := c.Param("name")
+		//fmt.Println(name)
+		var dataList []List // 定义结构体		可能会查询到一个或多个
+
+		// 查询数据库
+		db.Where("name = ?", name).Find(&dataList)
+
+		// 判断是否查询到数据
+		if len(dataList) == 0 {
+			c.JSON(200, gin.H{
+				"msg":  "没有查询到对应数据",
+				"data": gin.H{},
+				"code": 400,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"msg":  "查询成功了",
+				"data": dataList,
+				"code": 200,
+			})
+		}
+
+	})
 
 	//端口号
 	PORT := "3000"
