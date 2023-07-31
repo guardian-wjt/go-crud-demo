@@ -130,6 +130,46 @@ func main() {
 	})
 
 	//改
+	r.PUT("/user/update/:id", func(c *gin.Context) {
+		// 1.找到id所对应的条目
+		// 2.判断id是否存在
+		// 3.存在修改对应条目
+		// 4.不存在，返回id没找到
+
+		var data List
+
+		//接收id
+		id := c.Param("id")
+
+		//判断id是否存在
+		db.Select("id").Where("id = ?", id).Find(&data)
+
+		// 不存在，返回id没找到	|	存在修改对应条目
+		if data.ID == 0 {
+			c.JSON(200, gin.H{
+				"msg":  "用户id没找到",
+				"code": 400,
+			})
+		} else {
+			//操作数据库修改
+			err := c.ShouldBindJSON(&data) //模型绑定
+
+			if err != nil {
+				c.JSON(200, gin.H{
+					"msg":  "修改失败",
+					"code": 400,
+				})
+			} else {
+				// db 修改数据库内容
+				db.Where("id = ?", id).Updates(&data)
+				c.JSON(200, gin.H{
+					"msg":  "修改成功",
+					"code": 200,
+				})
+			}
+		}
+
+	})
 
 	//查
 
