@@ -68,6 +68,8 @@ func main() {
 	错误：400
 	*/
 
+	// restful 编码规范	风格
+
 	//增
 	r.POST("/user/add", func(c *gin.Context) {
 		var data List
@@ -96,6 +98,36 @@ func main() {
 	})
 
 	//删
+	// 1.找到id所对应的条目
+	// 2.判断id是否存在
+	// 3.存在从数据库中删除
+	// 4.不存在，返回id没找到
+	r.DELETE("/user/delete/:id", func(c *gin.Context) {
+		var data []List //定义结构体，可能会查找到多个，用切片类型
+
+		// 接收id
+		id := c.Param("id")
+
+		// 判断id是否存在
+		db.Where("id = ?", id).Find(&data)
+
+		// id存在从数据库中删除,不存在，返回id没找到
+		if len(data) == 0 {
+			c.JSON(200, gin.H{
+				"msg":  "id没找到，删除失败",
+				"code": 400,
+			})
+		} else {
+			//操作数据库删除
+			db.Where("id = ?", id).Delete(&data)
+
+			c.JSON(200, gin.H{
+				"msg":  "删除成功",
+				"code": 200,
+			})
+		}
+
+	})
 
 	//改
 
