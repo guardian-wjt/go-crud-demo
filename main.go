@@ -58,12 +58,42 @@ func main() {
 	r := gin.Default()
 
 	//测试
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "请求成功了",
-		})
-	})
+	//r.GET("/", func(c *gin.Context) {
+	//	c.JSON(200, gin.H{
+	//		"message": "请求成功了",
+	//	})
+	//})
+	/* 业务代码
+	正确：200
+	错误：400
+	*/
+
 	//增
+	r.POST("/user/add", func(c *gin.Context) {
+		var data List
+
+		err := c.ShouldBindJSON(&data) //模型绑定
+
+		// 判断绑定是否错误
+		if err != nil {
+			c.JSON(200, gin.H{
+				"msg":  "添加失败",
+				"data": gin.H{},
+				"code": 400,
+			})
+		} else {
+			// 进行数据库的操作 —— 创建一条数据
+			db.Create(&data) // 通过结构体的指针来创建数据
+
+			c.JSON(200, gin.H{
+				"msg":  "添加成功了",
+				"data": data,
+				"code": 200,
+			})
+
+		}
+
+	})
 
 	//删
 
